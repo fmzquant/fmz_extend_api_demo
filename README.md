@@ -102,7 +102,7 @@
       
       ![alt](https://dn-filebox.qbox.me/0d9a9751442b9dc78ba2a0c3b3bc2347c5cd8ab9.png)
       
-      ```
+      ```python
       def robot_run(robotId, appId, exchanges):
           strategyId = -1
           # 从策略库里选出一个包含main字符串的策略运行, 也可以预定义
