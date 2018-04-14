@@ -78,11 +78,11 @@ BotVS 对于 技术底层做出了强有力的支持，只需使用 BotVS 的 �
     - 运行显示：
     
       ![alt](https://dn-filebox.qbox.me/60bb0b2e41e31d7354a461a63300841c24658a7f.png)
-    
+      
       运行服务端程序后，在浏览器打开本地页面：http://127.0.0.1:5000
 
       ![alt](https://dn-filebox.qbox.me/6e179f4b1dd680dbcc4f8b96d189f289d780e853.png)
-
+      
     - 测试注册页面
     
       ![alt](https://dn-filebox.qbox.me/83b09142e42ae0ff4d9c8f789a771fb99c1f2d48.png)
