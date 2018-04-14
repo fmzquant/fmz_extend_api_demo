@@ -1,0 +1,135 @@
+{% if platforms %}
+<script>
+    function runRobot(action) {
+        var btnRun = $("#btnRun");
+        var btnStop = $("#btnStop");
+        if (action == "run") {
+            btnRun.text("启动中...");
+            btnRun.attr("disabled", true);
+        } else {
+            btnStop.text("停止中...");
+            btnStop.attr("disabled", true);
+            btnRun.hide();
+        }
+        var success = false;
+        $.ajax({ url: "/dashboard?action="+action, success: function(res){
+            if (typeof(res.code) === 'number' && res.code != 0) {
+                success = false;
+            } else {
+                if (action == "run") {
+                    btnRun.text("运行中...");
+                    btnStop.show();
+                    success = true;
+                } else {
+                    btnRun.show();
+                    btnStop.hide();
+                    btnStop.text("停止");
+                    btnStop.attr("disabled", false);
+                }
+            }
+        }}).always(function() {
+            if (!success) {
+                btnRun.text("一键启动");
+                btnRun.attr("disabled", false);
+            }
+        });
+    }
+    function refresh() {
+        $.ajax({ url: "/dashboard?action=refresh", success: function(res){
+            if (typeof(res.profit) == 'number') {
+                $('#robot_profit').text(res.profit);
+            }
+            if (typeof(res.running) == 'boolean') {
+                
+            }
+        }}).always(function() {
+            setTimeout(refresh, 5000);
+        });
+    }
+    setTimeout(refresh, 5000);
+</script>
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">策略组合</div>
+    <div class="panel-body">
+        <small>可以自定义资金分配比例</small>
+    </div>
+    <table class="table">
+        <thead>
+            <th width=300>策略名称</th>
+            <th>资金占比</th>
+            <th>风格</th>
+            <th>交易平台</th>
+        </thead>
+        <tr>
+            <td>追涨杀跌趋势策略</td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                        <span>50%</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="label label-danger">长线求稳</span>
+            </td>
+            <td>
+                {% for ele in platforms %}
+                    <span class="label label-success">{{ ele.label }}</span>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>对冲高频套利交易</td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 30%">
+                        <span>30%</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="label label-warning">微利</span>
+            </td>
+            <td>
+                {% for ele in platforms %}
+                    <span class="label label-success">{{ ele.label }}</span>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>区块链资产轮动策略</td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                        <span>20%</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="label label-success">只交易优质链</span>
+            </td>
+            <td>
+                {% for ele in platforms %}
+                    <span class="label label-success">{{ ele.label }}</span>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <b>当前利润</b>: <b style="color:red" id="robot_profit">{{ profit }}</font>
+    </div>
+    <div class="col-md-6">
+        <div class="pull-right">
+            <button class="btn btn-success" id="btnRun" style="display:{%if running%}none{%else%}blocked{%endif%}" onclick="runRobot('run')">一键启动</button>
+            <button class="btn btn-danger" id="btnStop" style="display:{%if running%}blocked{%else%}none{%endif%}" onclick="runRobot('stop')">停止</button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-danger" role="alert" style="margin-top:20px">
+    <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
+</div>
+{% endif %}

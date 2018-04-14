@@ -1,0 +1,44 @@
+{% if not current_user.is_authenticated() %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand">BotVS API Demo</span>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+            <li class="{% if request.path == '/' %}active{%else%}inactive{% endif %}"><a href="/">首页</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            <li class="{% if request.path == '/login' %}active{%else%}inactive{% endif %}"><a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span>&nbsp;登录</a></li>
+            <li class="{% if request.path == '/signup' %}active{%else%}inactive{% endif %}"><a href="{{ url_for('signup') }}"><span class="glyphicon glyphicon-user"></span>&nbsp;注册</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% else %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        </button>
+        <span class="navbar-brand">Welcome, {{current_user.username}} !</span>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="/dashboard"><span class="glyphicon glyphicon-dashboard"></span>&nbsp;控制中心</a></li>
+            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>&nbsp;退出</a></li>
+        </ul>
+    </div>
+    </div>
+</nav>
+{% endif %}

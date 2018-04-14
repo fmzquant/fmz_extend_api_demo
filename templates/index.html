@@ -1,0 +1,22 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+BotVS API Demo
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='starter-template.css')}}">
+{% endblock %}
+
+{% block content %}
+    {% include "nav.html" %}
+    <div class="container">
+      <div class="starter-template">
+        <h1>BotVS</h1>
+        <p class="lead">演示如何使用BotVS的扩展API打造自己的资产管理量化平台</p>
+        <p>连接国内商品期货, 外盘CME/CBOT等, 以及主流全球35家区块链资产交易所, 策略运行调度全部托管于BotVS</p>
+        <a target="_blank" href="https://www.botvs.com/api#%E6%89%A9%E5%B1%95API">详细API文档</a>
+      </div>
+    </div>
+{% endblock %}

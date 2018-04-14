@@ -1,0 +1,75 @@
+{% if platforms %}
+<script>
+    function action(action, pid) {
+        var btn = $("#btn_"+action+"_" + pid);
+        var old = btn.text();
+        btn.text("执行中...");
+        btn.attr("disabled", true);
+        $.ajax({ url: "/assets?action="+action+"&pid="+pid, success: function(res){
+            if (action == "del") {
+                $("#p_"+pid).remove();
+            }
+        }}).done(function( data ) {
+            btn.text(old);
+            btn.attr("disabled", false);
+            if (action == "balance") {
+                if (typeof(data.error) === 'string') {
+                    alert(data.error);
+                } else {
+                    try {
+                        var obj = JSON.parse(data.data.result);
+                        if (typeof(obj.error) === 'string') {
+                            alert(obj.error);
+                        } else {
+                            alert(obj.result);
+                        }
+                    } catch(e) {
+                        console.log(e);
+                    }
+                }
+            }
+        }).always(function() {
+            btn.text(old);
+            btn.attr("disabled", false);
+        });
+    }
+</script>
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">已绑定资产</div>
+  <div class="panel-body">
+      <p>运行策略时可以跟交易所绑定起来<span class="pull-right"><a class="label label-success" href="{{url_for('exchanges')}}"><span class="glyphicon glyphicon-plus"></span>&nbsp;添加资产</a></span></p>
+  </div>
+
+  <!-- Table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+            <th>#</th>
+            <th>交易所</th>
+            <th>标签</th>
+            <th>添加时间</th>
+            <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ele in platforms %}
+            <tr id="p_{{ele.id}}">
+                <td width=80>{{ele.id}}</td>
+                <td>{{ ele.eid }}</td>
+                <td>{{ ele.label }}</td>
+                <td>{{ ele.date }}</td>
+                <td width=160>
+                    <span class="btn btn-xs btn-danger" id="btn_del_{{ele.id}}" onclick="action('del', {{ele.id}})">删除</span>
+                    <span class="btn btn-xs btn-success" id="btn_balance_{{ele.id}}" onclick="action('balance', {{ele.id}})">余额</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-danger" role="alert" style="margin-top:20px">
+    <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
+</div>
+{% endif %}

@@ -1,0 +1,33 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+控制中心
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+{% block content %}
+{% include "nav.html" %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li class="{% if request.path == '/dashboard' %}active{%else%}inactive{% endif %}"><a href="/dashboard"><span class="glyphicon glyphicon-knight" style="width:20px"></span>投资策略</a></li>
+            <li class="{% if request.path == '/assets' %}active{%else%}inactive{% endif %}"><a href="/assets"><span class="glyphicon glyphicon-lock" style="width:20px"></span>资产状态</a></li>
+            <li class="{% if request.path == '/exchanges' %}active{%else%}inactive{% endif %}"><a href="/exchanges"><span class="glyphicon glyphicon-magnet" style="width:20px"></span>添加资产</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            {% if request.path == '/dashboard' %}
+                {% include "strategy.html" %}
+            {% else %}
+                {% include request.path[1:]+".html" %}
+            {% endif %}
+        </div>
+      </div>
+    </div>
+{% endblock %}
