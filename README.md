@@ -97,7 +97,7 @@
       
       main Test profit 策略代码如下：
       
-      ```
+      ```javascript
       function main() {
           while(true) {
           LogProfit(Math.random()*100);
@@ -106,7 +106,7 @@
       }
       ```
       
-      ![alt](https://dn-filebox.qbox.me/52792c59a5db460c0bdf5a229803b92f92b8cb07.png)
+      ![alt](https://dn-filebox.qbox.me/52792c59a5db460c0bdf5a229803b92f92b8cb07.png)
       
       编辑代码后，点击保存。
     
