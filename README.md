@@ -109,7 +109,7 @@ BotVS 对于 技术底层做出了强有力的支持，只需使用 BotVS 的 �
       ```javascript
       function main() {
           while(true) {
-            LogProfit(Math.random()*100);
+              LogProfit(Math.random()*100);
               Sleep(1000);
           }
       }
