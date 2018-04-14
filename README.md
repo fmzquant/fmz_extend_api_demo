@@ -20,15 +20,15 @@ BotVS 对于 技术底层做出了强有力的支持，只需使用 BotVS 的 �
 - ### 打造属于自己的量化平台
 
   - 高度自由的策略设计
-  
+
     使用 Python 、JavaScript 、C++ 语言编写 量化交易策略，自由定制，可以在量化交易的世界天马行空般的实现自己的交易思路。
-  
+
   - 强大高效的回测系统
-  
+
     从此再也不用辛苦收集数据，本地回测系统引擎 只用一个命令轻松配置，链接：https://github.com/botvs/backtest_python
-  
+
   - 精简的架构
-    
+  
     只用编写几个 前端页面，一个HTTP服务端程序，即可轻松搭建。
     
 - ### DEMO项目
@@ -76,21 +76,16 @@ BotVS 对于 技术底层做出了强有力的支持，只需使用 BotVS 的 �
     ```
     
     - 运行显示：
-
       ![alt](https://dn-filebox.qbox.me/60bb0b2e41e31d7354a461a63300841c24658a7f.png)
-      
-      运行服务端程序后，在浏览器打开本地页面：http://127.0.0.1:5000
-
+      运行服务端程序后，在浏览器打开本地页面：http://127.0.0.1:5000
       ![alt](https://dn-filebox.qbox.me/6e179f4b1dd680dbcc4f8b96d189f289d780e853.png)
       
     - 测试注册页面
     
       ![alt](https://dn-filebox.qbox.me/83b09142e42ae0ff4d9c8f789a771fb99c1f2d48.png)
-
       本项目 DEMO 量化平台 已经运行起来了，注册好 这个测试平台的 账号（储存在本地数据的），登录进去 配置 作为这个平台用户的 交易所API KEY。
-    
+      
       ![alt](https://dn-filebox.qbox.me/d38f7155af07c0231dcdf632887585042268d058.png)
-
       ![alt](https://dn-filebox.qbox.me/2c6f6c8021a8d69e357a2e0fe538f3a919f3f8b4.png)
      
       现在配置好了如图：
