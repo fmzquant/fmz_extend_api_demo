@@ -1,6 +1,7 @@
 #!encoding=utf8
 
 # 配置BotVS平台的AccessKey与SecretKey
+
 BOTVS_ACCESS_KEY = 'xxxxx'
 BOTVS_SECRET_KEY = 'yyyyy'
 
@@ -140,7 +141,7 @@ def index():
 def login():
     form = LoginForm()
     error = None
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
 
     if form.validate_on_submit():
