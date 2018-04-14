@@ -1,7 +1,6 @@
 #!encoding=utf8
 
 # 配置BotVS平台的AccessKey与SecretKey
-
 BOTVS_ACCESS_KEY = 'xxxxx'
 BOTVS_SECRET_KEY = 'yyyyy'
 
