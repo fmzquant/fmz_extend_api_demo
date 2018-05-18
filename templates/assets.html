@@ -61,7 +61,7 @@
                 <td>{{ ele.date }}</td>
                 <td width=160>
                     <span class="btn btn-xs btn-danger" id="btn_del_{{ele.id}}" onclick="action('del', {{ele.id}})">删除</span>
-                    <span class="btn btn-xs btn-success" id="btn_balance_{{ele.id}}" onclick="action('balance', {{ele.id}})">余额</span>
+                    <a class="btn btn-xs btn-success" id="btn_balance_{{ele.id}}" href="{{ url_for('hub') }}">交易</a>
                 </td>
             </tr>
             {% endfor %}

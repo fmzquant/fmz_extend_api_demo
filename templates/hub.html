@@ -1,0 +1,588 @@
+
+<script>
+    var platforms = {{ platforms | safe}};
+</script>
+{% raw %}
+<div ng-app="myApp" ng-controller="myCtrl" ng-cloak>
+    <div class="row" style="margin-top:30px" ng-show="platforms.length==0">
+        <div class="alert alert-danger" role="alert" style="margin-top:20px">
+            <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
+        </div>
+    </div>
+    <div class="row" ng-show="platforms.length>0">
+        <div class="alert alert-success" align="center">
+            <div ng-show="ticker.update==0">
+                Loading...
+            </div>
+            <div ng-show="ticker.update>0">
+                <span><b>High</b>: {{ticker.high}}</span>
+                <span><b>Low</b>: {{ticker.low}}</span>
+                <span><b>Bid</b>: {{ticker.bid}}</span>
+                <span><b>Ask</b>: {{ticker.ask}}</span>
+                <span><b>Last</b>: <font color="red"><b>{{ticker.last}}</b></font></span>
+                <span><b>Vol</b>: {{ticker.vol}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <!--<label class="label label-danger" style="margin-right:5px">{{currentMarket.label}}.{{currentSymbol}}</label>-->
+                <div class="btn-group" role="group">
+                    <button ng-repeat="ele in periodGroup" ng-click="switchPeriod(ele.v)" ng-class="{true:'btn btn-success btn-xs', false:'btn btn-default btn-xs'}[currentperiod==ele.v]">{{ ele.name}}</button>
+                </div>
+                <div class="pull-right">
+                    <span style="margin-right:30px"><b>Update</b>: {{update}}</span>
+                    <select style="height:25px" ng-model="currentMarket" ng-change="switchMarket()" ng-options="market.label for market in markets"></select>
+                    <select style="height:25px" ng-model="currentSymbol" ng-change="switchMarket()" ng-options="symbol for symbol in currentMarket.symbols"></select>
+                </div>
+                <div style="height:380px" id="ohlc_chart"></div>
+                <div style="margin-top:5px">
+                    <ul class="nav nav-tabs">
+                        <li role="presentation" class="inactive">
+                            <a ng-href="#tab_0" role="tab" data-toggle="tab">Orders&nbsp;<span class="badge pull-right">{{ pending_orders.length }}</span></a>
+                        </li>
+                        <!--<li role="presentation" class="inactive">-->
+                            <!--<a ng-href="#tab_1" role="tab" data-toggle="tab">History&nbsp;<span class="badge pull-right">{{ account.history }}</span></a>-->
+                        <!--</li>-->
+                        <li role="presentation" class="active">
+                            <a ng-href="#tab_2" role="tab" data-toggle="tab">Assets</a>
+                        </li>
+                        <div class="pull-right">
+                            <button class="btn btn-success btn-xs" ng-disabled="isLoading" ng-click="refresh()"><i class="glyphicon glyphicon-refresh"></i></button>
+                        </div>
+                    </ul>
+                    <div class="tab-content" style="margin-top:15px">
+                        <div role="tabpanel" class="tab-pane fade in inactive" id="tab_0">
+                            <div ng-if="pending_orders.length==0">
+                                <div class="alert alert-success">Empty</div>
+                            </div>
+                            <table class="table table-condensed table-hover" ng-if="pending_orders.length>0">
+                                <thead>
+                                    <tr>
+                                        <th class="col-md-4">Id</th>
+                                        <th class="col-md-1"></th>
+                                        <th class="col-md-2" style="text-align:right;">Price</th>
+                                        <th class="col-md-3" style="text-align:right;">Amount</th>
+                                        <th class="col-md-2"></th>
+                                    </tr>
+                                </thead>
+                                <tr ng-repeat="order in pending_orders">
+                                    <td>{{ order.Id }}</td>
+                                    <td ng-style="{color:order.side==0 ? '#e9573f' : '#4d9e33'}">{{ ['Bid', 'Ask'][order.Type]}}</td>
+                                    <td align="right">{{ order.Price }}</td>
+                                    <td align="right">{{ order.Amount}}</td>
+                                    <td align="right">
+                                        <button ng-if="order.Status==0" class="btn btn-default btn-xs" ng-disabled="isLoading" ng-click="cancel(order)"><i class="glyphicon glyphicon-remove"></i></button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade in inactive" id="tab_1">
+                            <div ng-if="history_orders.length==0">
+                                <div class="alert alert-success">Empty</div>
+                            </div>
+                            <table class="table table-condensed table-hover" ng-if="history_orders.length>0">
+                                <thead>
+                                    <tr>
+                                        <th class="col-md-4">Time</th>
+                                        <th class="col-md-1"></th>
+                                        <th class="col-md-2" style="text-align:right;">Price</th>
+                                        <th class="col-md-2" style="text-align:right;">Amount</th>
+                                        <th class="col-md-1" style="text-align:right;">Fee</th>
+                                        <th class="col-md-2" style="text-align:right;">State</th>
+                                    </tr>
+                                </thead>
+                                <tr ng-repeat="order in history_orders | limitTo: history_page_size">
+                                    <td>{{ order.created }}</td>
+                                    <td ng-style="{color:order.side==0 ? '#e9573f' : '#4d9e33'}">{{ ['Limit', 'Market'][order.type] }} {{ ['Bid', 'Ask'][order.side] }}</td>
+                                    <td align="right"><span popover-trigger="mouseenter" uib-popover="Avg: {{order.avg_price}}" ng-if="order.avg_price>0 && order.avg_price!=order.price" style="margin-right:3px;font-style:italic;font-size:11px;color:#cccccc">({{ order.avg_price}})</span>{{ order.price }}</td>
+                                    <td align="right"><span popover-trigger="mouseenter" uib-popover="Deal: {{order.deal_amount}}" ng-if="order.deal_amount>0&&order.deal_amount!=order.amount" style="margin-right:3px;font-style:italic;font-size:11px;color:#cccccc">({{ order.deal_amount}})</span>{{ order.amount}}</td>
+                                    <td align="right">{{ order.fee}}</td>
+                                    <td align="right" ng-style="{'text-decoration':order.state==1 ? 'none' : 'line-through', color:order.state==1 ? '#4d9e33' : '#747474'}">{{ order.state == 1 ? 'Filled' : 'Cancelled'}}</td>
+                                </tr>
+                            </table>
+                            <nav>
+                                <ul class="pager">
+                                    <li ng-class="{disabled: history_page==0}"><a href ng-click="historyGo(0)">First</a></li>
+                                    <li ng-class="{disabled: history_page==0}"><a href ng-click="historyGo(-1)">Previous</a></li>
+                                    <span class="badge">{{history_page+1}}</span>
+                                    <li ng-class="{disabled: history_orders.length<history_page_size}"><a href ng-click="historyGo(1)">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade in active" id="tab_2">
+                            <table class="table table-condensed table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="col-md-3">Assets</th>
+                                        <th class="col-md-2" style="text-align:center;">Free</th>
+                                        <th class="col-md-2" style="text-align:center;">Frozen</th>
+                                    </tr>
+                                </thead>
+                                <tr ng-repeat="item in assets">
+                                    <td>{{ item.currency }}</td>
+                                    <td align="center" style="color:blue">{{ item.free.toFixed(8) }}</td>
+                                    <td align="center" style="color:red">{{ item.frozen.toFixed(8) }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Last: <font color="red"><b>{{ticker.last || '--'}}</b></font></div>
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width:8%;text-align:center">#</th>
+                                <th style="width:26%;color:#e9573f;text-align:right">Amount</th>
+                                <th style="width:20%;color:#e9573f;text-align:right">Bid</th>
+                                <th style="width:20%;color:#4d9e33;text-align:left">Ask</th>
+                                <th style="width:26%;color:#4d9e33;text-align:left">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="row in depth.rows">
+                                <td align="center">{{$index+1}} </td>
+                                <td style="color:#e9573f" align="right" ng-click="op.bidAmount=op.askAmount=row[1][1]">{{ row[1][1] }} </td>
+                                <td style="color:#e9573f" align="right" ng-click="op.bidPrice=op.askPrice=row[1][0]">{{ row[1][0] }} </td>
+                                <td style="color:#4d9e33" align="left" ng-click="op.bidPrice=op.askPrice=row[0][0]">{{ row[0][0] }} </td>
+                                <td style="color:#4d9e33" align="left" ng-click="op.bidAmount=op.askAmount=row[0][1]">{{ row[0][1] }} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Trade<span class="pull-right"><input type="checkbox" ng-model="op.isMarket">&nbsp;Market</span></div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-6">
+                                <input type="text" ng-change="op.bidPrice=cutNumber(op.bidPrice, currentMarket.ZPrecision)" tabIndex=1 ng-model="op.bidPrice" class="form-control">
+                            </div>
+                            <div class="col-md-6 col-xs-6">
+                                <input type="text" ng-disabled="op.isMarket" ng-change="op.askPrice=cutNumber(op.askPrice, currentMarket.ZPrecision)" tabIndex=3 ng-model="op.askPrice" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:8px">
+                            <div class="col-md-6 col-xs-6">
+                                <input type="text" ng-disabled="op.isMarket" ng-change="op.bidAmount=cutNumber(op.bidAmount, currentMarket.XPrecision)" tabIndex=2 ng-model="op.bidAmount" class="form-control">
+                            </div>
+                            <div class="col-md-6 col-xs-6">
+                                <input type="text" ng-change="op.askAmount=cutNumber(op.askAmount, currentMarket.XPrecision)" tabIndex=4 ng-model="op.askAmount" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row" align="center" style="margin-top:5px">
+                            <div class="col-md-6 col-xs-6">
+                                <button id="btn_buy" ng-disabled="isLoading" class="col-md-12 btn btn-danger" ng-click="buy()">Buy</button>
+                            </div>
+                            <div class="col-md-6 col-xs-6">
+                                <button id="btn_sell" ng-disabled="isLoading" class="col-md-12 btn btn-primary" ng-click="sell()">Sell</button>
+                            </div>
+                        </div>
+                        <div class="row" align="center" style="margin-top:5px">
+                            <div class="col-md-6 col-xs-6">
+                                <span class="label label-default pull-right">{{ assets.length == 2 ? assets[0].free.toFixed(8) : ''}}</span>
+                            </div>
+                            <div class="col-md-6 col-xs-6">
+                                <span class="label label-default pull-left">{{ assets.length == 2 ? assets[1].free.toFixed(8) : '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $timeout) {
+    var ORDER_TYPE_LIMIT = 0;
+    var ORDER_TYPE_MARKET = 1;
+    var ORDER_BUY = 0;
+    var ORDER_SELL = 1;
+
+    function _N(n, precision) {
+        return parseInt(Math.round(n * Math.pow(10, precision))) / Math.pow(10, precision)
+    }
+
+    function _T(n) {
+        return moment(n).format('YYYY-MM-DD HH:mm:ss');
+    }
+    var maxTrades = 30;
+    $scope.ticker = {update:0};
+    $scope.depth = {rows: [], asks:[], bids:[]};
+    $scope.op = {};
+    $scope.markets = [];
+    $scope.platforms = platforms;
+    if (platforms.length == 0) {
+        return;
+    }
+    for (var i = 0; i < platforms.length; i++) {
+        if (platforms[i].eid == 'Binance') {
+            $scope.markets.push({
+                'pid': platforms[i].id,
+                'label': platforms[i].label,
+                'name': 'Binance',
+                'symbols': ['ETH_BTC', 'LTC_BTC', 'BNB_BTC', 'EOS_BTC', 'ETH_USDT', 'BTC_USDT', 'LTC_USDT']
+            });
+        } else if (platforms[i].eid == 'OKEX') {
+            $scope.markets.push({
+                'pid': platforms[i].id,
+                'label': platforms[i].label,
+                'name': 'OKEX',
+                'symbols': ["ETH_BTC", "LTC_BTC", "EOS_BTC", "OKB_BTC", "BCH_BTC", "ZEC_BTC", "BTC_USDT", "LTC_USDT", "ETH_USDT"]
+            });
+        }
+    }
+    var defPid = parseInt(localStorage.getItem("pid"));
+    var defSymbol = localStorage.getItem("symbol");
+    var found = false;
+    if (typeof(defSymbol) === 'string' && typeof(defPid) === 'number') {
+        var arr = defSymbol.toLowerCase().split('.');
+        for (var i = 0; i < $scope.markets.length && !found; i++) {
+            var obj = $scope.markets[i];
+            if (obj.pid == defPid) {
+                for (var j = 0; j < obj.symbols.length; j++) {
+                    if (obj.symbols[j].toLowerCase() == defSymbol.toLowerCase()) {
+                        found = true;
+                        $scope.currentMarket = obj;
+                        $scope.currentSymbol = obj.symbols[j];
+                        break
+                    }
+                }
+            }
+        }
+    }
+    if (!found) {
+        $scope.currentMarket = $scope.markets[0];
+        $scope.currentSymbol = $scope.markets[0].symbols[0];
+    }
+    $scope.assets = [];
+    $scope.pending_orders = [];
+    $scope.symbol = $scope.currentMarket.name + "." + $scope.currentSymbol;
+    var __pid = $scope.currentMarket.pid;
+    $scope.periodGroup = [
+        {name:'1m', v:1*60},
+        {name:'5m', v:5*60},
+        {name:'15m', v:15*60},
+        {name:'30m', v:30*60},
+        {name:'1h', v:60*60},
+        {name:'1d', v:1440*60},
+    ]
+    $scope.currentperiod = localStorage.getItem("period") || 15*60;
+    
+    $scope.trades = [];
+    $scope.cutNumber = function(n, precision) {
+        n = n.replace(/[^0-9\.]/g, '');
+        var arr = n.split('.');
+        if (arr.length == 2) {
+            if (arr[1].length > precision) {
+                n = arr[0] + "." + arr[1].slice(0, precision);
+            }
+        }
+        return n;
+    }
+
+    var chart = null;
+    var preTime = 0;
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        },
+        credits: {
+            enabled: false
+        }
+    });
+
+
+    function updateChart(ohlc, volume) {
+        var chartName = 'sandbox';
+        if (chart == null) {
+            var groupingUnits = [
+                [ 'minute', [60] ],
+                [ 'hour', [1] ],
+                [ 'day', [1] ],
+                [ 'week', [1] ],
+                [ 'month', [1, 3, 6] ],
+                [ 'year', null ]
+            ];
+            var cfg = {
+                title: {
+                    text: null
+                },
+                legend: {
+                    enabled: false
+                },
+                exporting: {
+                    enabled: false
+                },
+                chart: {
+                    renderTo: "ohlc_chart"
+                },
+                plotOptions: {
+                    series: {
+                        turboThreshold: 0
+                    },
+                    candlestick: {
+                        color: '#d75442',
+                        upColor: '#6ba583'
+                    }
+                },
+                rangeSelector: {
+                    enabled: false,
+                },
+                tooltip: {
+                    xDateFormat: '%Y-%m-%d %H:%M:%S',
+                    color: '#f0f',
+                    borderColor: '#058dc7',
+                    crosshairs: true,
+                    shared: true,
+                    snap: 1,
+                },
+                xAxis: {
+                    min: ohlc.length > 0 ? ohlc[ohlc.length-Math.min(ohlc.length, 50)].x : 0,
+                    max: ohlc.length > 0 ? ohlc[ohlc.length-1].x : 0
+                },
+                yAxis: [{
+                    height: '95%',
+                    gridLineWidth: 0,
+                }, {
+                    labels: {
+                        enabled: false
+                    },
+                    top: '95%',
+                    height: '5%',
+                    offset: 0,
+                    gridLineWidth: 0
+                }],
+                series: [{
+                    type: 'candlestick',
+                    name: $scope.symbol,
+                    id: 'primary',
+                    data: ohlc,
+                    dataGrouping: {
+                        units: groupingUnits
+                    }
+                }, {
+                    type: 'column',
+                    name: 'Volume',
+                    data: volume,
+                    tooltip: {
+                        valueDecimals: 8
+                    },
+                    yAxis: 1,
+                    dataGrouping: {
+                        units: groupingUnits
+                    }
+                }]
+            };
+            chart = new Highcharts.StockChart(cfg, function(chart) {
+                window._chart = chart;
+            });
+        } else {
+            var needShift = chart.series[0].data.length > 2000;
+            for (var i = 0; i < ohlc.length; i++) {
+                var point = chart.get(ohlc[i].id);
+                if (point) {
+                    point.update(ohlc[i], false);
+                } else {
+                    chart.series[0].addPoint(ohlc[i], false, needShift);
+                }
+                point = chart.get(volume[i].id);
+                if (point) {
+                    point.update(volume[i], false);
+                } else {
+                    chart.series[1].addPoint(volume[i], false, needShift);
+                }
+            }
+            chart.redraw();
+        }
+        $scope.ticker.last = window._chart.series[0].data[window._chart.series[0].data.length-1].close;
+    }
+    
+    var channels = [];
+    ['ticker', 'depth', 'ohlc@'+$scope.currentperiod].map(function(c){
+        channels.push($scope.symbol.toLowerCase()+"."+c);
+    });
+    var addr = "ws://q.botvs.net/stream?streams="+channels.join("/");
+    var wsStatus = 0;
+    var wsObj = null;
+    $scope.retryTime = 0;
+    function Listener() {
+        $scope.retryTime++;
+        var ws = new WebSocket(addr);
+        wsObj = ws;
+        ws.onopen = function() {
+            wsStatus = 1;
+            console.log("ws onopen");
+        }
+        ws.onmessage = function(message) {
+            $scope.$apply(function(){
+                angular.fromJson(message.data).map(function(ele){;
+                    if (typeof(ele.e) == 'string') {
+                        var arr = ele.e.split('.');
+                        var e = arr[2];
+                        if (e == 'ticker') {
+                            $scope.ticker = _.extend({'update': ele.t}, ele.d);
+                            $scope.update = _T(ele.t) + "." + ele.t%1000;
+                        } else if (e.indexOf('ohlc') !== -1) {
+                            var ohlc = [];
+                            var volume = [];
+                            for (var i = 0; i < ele.d.length; i++) {
+                                var obj = ele.d[i];
+                                var x = obj.t;
+                                ohlc.push({id:'k_' + x, x:x, open:obj.o, high:obj.h, low:obj.l, close:obj.c});
+                                volume.push({id: 'v_' + x, x:x, y: obj.v});
+                            }
+                            updateChart(ohlc, volume);
+                        } else if (e == 'trade') {
+                            /*
+                            var arr = $scope.trades.concat(ele.d);
+                            if (arr.length > maxTrades) {
+                                arr = arr.slice(arr.length-maxTrades);
+                            }
+                            $scope.trades = arr;
+                            */
+                        } else if (e == 'depth') {
+                            var asks = ele.d.asks;
+                            var bids = ele.d.bids;
+                            var rows = [];
+                            var maxLen = Math.min(10, Math.max(asks.length, bids.length));
+                            if (asks.length > 0) {
+                                $scope.ticker.ask = asks[0][0];
+                            }
+                            if (bids.length > 0) {
+                                $scope.ticker.bid = bids[0][0];
+                            }
+                            for (var i = 0; i < maxLen; i++) {
+                                rows.push([asks[i] || [undefined, undefined], bids[i] || [undefined, undefined]]);
+                            }
+                            $scope.depth = {rows:rows};
+                        }
+                    }
+                })
+            });
+        }
+        ws.onclose = function(msg) {
+            wsStatus = 2;
+            console.log("ws onclose");
+        }
+    }
+    Listener();
+    setInterval(function() {
+        if (wsStatus == 2) {
+            wsStatus = 0;
+            Listener();
+        }
+    }, 500);
+
+    function goSymbol(pid, symbol) {
+        localStorage.setItem("pid", pid);
+        localStorage.setItem("symbol", symbol);
+        location.reload(true);
+    }
+
+    $scope.switchPeriod = function(period) {
+        if (period == $scope.currentperiod) {
+            return
+        }
+        localStorage.setItem("period", period);
+        location.reload(true);
+    }
+    
+    $scope.switchMarket = function() {
+        goSymbol($scope.currentMarket.pid, $scope.currentSymbol);
+    }
+    $scope.$on('$destroy', function() {
+        if (wsObj) {
+            wsObj.close();
+        }
+    });
+    function action(action, symbol, args) {
+        if (typeof(args) === 'undefined') {
+            args = [];
+        }
+        $scope.isLoading = true;
+        $.ajax({ url: "/hub?action="+action+"&symbol="+symbol+"&args="+angular.toJson(args)+"&pid="+__pid, success: function(res){
+            $scope.isLoading = false;
+            var errMsg = "";
+            if (res.code == 0) {
+                var dic = angular.fromJson(res.data.result);
+                var obj = angular.fromJson(dic.result);
+                if (obj) {
+                    if (action == 'balance') {
+                        var arr = symbol.split('.')[1].split('_');
+                        var orders = obj[0];
+                        var acc = obj[1];
+                        if (orders) {
+                            $scope.pending_orders = obj[0];
+                        }
+                        if (acc) {
+                            $scope.assets = [
+                                {currency: arr[1], free: acc.Balance, frozen: acc.FrozenBalance},
+                                {currency: arr[0], free: acc.Stocks, frozen: acc.FrozenStocks},
+                            ];
+                        }
+                    }
+                } else {
+                    errMsg = angular.toJson(dic.logs);
+                    for (var i = 0; i < dic.logs.length; i++) {
+                        if (dic.logs[i].LogType==3) {
+                            errMsg = dic.logs[i].Extra;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (action != "balance") {
+                $scope.updateBalance();
+            }
+            $scope.$digest();
+            if (errMsg.length > 0){
+                alertify.alert("Error: " + errMsg);
+            }
+        }}).done(function( data ) {
+        }).always(function() {
+            $scope.isLoading = false;
+        });
+    }
+
+    $scope.updateBalance = function() {
+        action("balance", $scope.symbol, []);
+    }
+
+    $scope.buy = function() {
+        var price = parseFloat($scope.op.bidPrice);
+        var amount = parseFloat($scope.op.bidAmount);
+        if (isNaN(price) || (!$scope.op.isMarket && isNaN(amount))) {
+            return;
+        }
+        if ($scope.op.isMarket) {
+            amount = price;
+            price = -1;
+        }
+        action("buy", $scope.symbol, [price, amount])
+    };
+    $scope.sell = function() {
+        var price = parseFloat($scope.op.askPrice);
+        var amount = parseFloat($scope.op.askAmount);
+        if ((!$scope.op.isMarket && isNaN(price)) || isNaN(amount)) {
+            return;
+        }
+        if ($scope.op.isMarket) {
+            price = -1;
+        }
+        action("sell", $scope.symbol, [price, amount])
+    };
+    $scope.cancel = function(order) {
+        action("cancel", $scope.symbol, [order.Id])
+    };
+    $scope.refresh = function() {
+        //location.reload(true);
+        $scope.updateBalance();
+    }
+    $timeout($scope.updateBalance, 0);
+});
+</script>
+{% endraw %}

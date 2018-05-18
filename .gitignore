@@ -1,0 +1,9 @@
+.DS_Store
+_obj
+.tmp
+_test
+__pycache__
+*.sqlite
+*.sqlite3
+*.pyc
+*.sh

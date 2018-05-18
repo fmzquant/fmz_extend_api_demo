@@ -9,6 +9,18 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://apps.bdimg.com/libs/alertify.js/0.3.11/alertify.min.js"></script>
+<link rel="stylesheet" href="http://apps.bdimg.com/libs/alertify.js/0.3.11/alertify.default.css">
+<link rel="stylesheet" href="http://apps.bdimg.com/libs/alertify.js/0.3.11/alertify.core.css">
+{% if request.path == '/hub' %}
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
+<script src="http://apps.bdimg.com/libs/moment/2.8.3/moment.js"></script>
+<script src="http://apps.bdimg.com/libs/underscore.js/1.7.0/underscore-min.js"></script>
+<script src="http://lib.sinaapp.com/js/highstock/2.0.1/highstock.js"></script>
+{% endif %}
+
 {% endblock %}
 {% block content %}
 {% include "nav.html" %}
@@ -16,7 +28,8 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-              <li class="{% if request.path == '/dashboard' %}active{%else%}inactive{% endif %}"><a href="/dashboard"><span class="glyphicon glyphicon-knight" style="width:20px"></span>投资策略</a></li>
+            <li class="{% if request.path == '/dashboard' %}active{%else%}inactive{% endif %}"><a href="/dashboard"><span class="glyphicon glyphicon-knight" style="width:20px"></span>投资策略</a></li>
+            <li class="{% if request.path == '/hub' %}active{%else%}inactive{% endif %}"><a href="/hub"><span class="glyphicon glyphicon-flash" style="width:20px"></span>交易中心</a></li>
             <li class="{% if request.path == '/assets' %}active{%else%}inactive{% endif %}"><a href="/assets"><span class="glyphicon glyphicon-lock" style="width:20px"></span>资产状态</a></li>
             <li class="{% if request.path == '/exchanges' %}active{%else%}inactive{% endif %}"><a href="/exchanges"><span class="glyphicon glyphicon-magnet" style="width:20px"></span>添加资产</a></li>
           </ul>
