@@ -405,7 +405,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     ['ticker', 'depth', 'ohlc@'+$scope.currentperiod].map(function(c){
         channels.push($scope.symbol.toLowerCase()+"."+c);
     });
-    var addr = "ws://q.botvs.net/stream?streams="+channels.join("/");
+    var addr = "ws://q.botvs.net/api/stream?streams="+channels.join("/");
     var wsStatus = 0;
     var wsObj = null;
     $scope.retryTime = 0;
