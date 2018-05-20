@@ -1,4 +1,5 @@
 
+<script src="http://q.botvs.net/api/symbols?format=script&var=symbols"></script>
 <script>
     var platforms = {{ platforms | safe}};
 </script>
@@ -219,20 +220,17 @@ app.controller('myCtrl', function($scope, $timeout) {
         return;
     }
     for (var i = 0; i < platforms.length; i++) {
-        if (platforms[i].eid == 'Binance') {
-            $scope.markets.push({
-                'pid': platforms[i].id,
-                'label': platforms[i].label,
-                'name': 'Binance',
-                'symbols': ['ETH_BTC', 'LTC_BTC', 'BNB_BTC', 'EOS_BTC', 'ETH_USDT', 'BTC_USDT', 'LTC_USDT']
-            });
-        } else if (platforms[i].eid == 'OKEX') {
-            $scope.markets.push({
-                'pid': platforms[i].id,
-                'label': platforms[i].label,
-                'name': 'OKEX',
-                'symbols': ["ETH_BTC", "LTC_BTC", "EOS_BTC", "OKB_BTC", "BCH_BTC", "ZEC_BTC", "BTC_USDT", "LTC_USDT", "ETH_USDT"]
-            });
+        for (var j = 0; j < symbols.length; j++) {
+            if (symbols[j].eid == platforms[i].eid) {
+                $scope.markets.push({
+                    'pid': platforms[i].id,
+                    'label': platforms[i].label,
+                    'eid': symbols[i].eid,
+                    'name': symbols[j].name,
+                    'symbols': symbols[j].symbols,
+                });
+                break;
+            }
         }
     }
     var defPid = parseInt(localStorage.getItem("pid"));
@@ -260,7 +258,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     }
     $scope.assets = [];
     $scope.pending_orders = [];
-    $scope.symbol = $scope.currentMarket.name + "." + $scope.currentSymbol;
+    $scope.symbol = $scope.currentMarket.eid + "." + $scope.currentSymbol;
     var __pid = $scope.currentMarket.pid;
     $scope.periodGroup = [
         {name:'1m', v:1*60},
@@ -322,12 +320,15 @@ app.controller('myCtrl', function($scope, $timeout) {
                 },
                 plotOptions: {
                     series: {
-                        turboThreshold: 0
+                        turboThreshold: 0,
+                        marker:{  
+                            enabled:false,
+                        },
                     },
                     candlestick: {
                         color: '#d75442',
                         upColor: '#6ba583'
-                    }
+                    },
                 },
                 rangeSelector: {
                     enabled: false,
@@ -375,6 +376,18 @@ app.controller('myCtrl', function($scope, $timeout) {
                     dataGrouping: {
                         units: groupingUnits
                     }
+                }, {
+                    name: "EMA (7)",
+                    type: 'ema',
+                    linkedTo: 'primary',
+                    lineWidth: 1,
+                    params: { period: 7 }
+                }, {
+                    name: "EMA (30)",
+                    type: 'ema',
+                    linkedTo: 'primary',
+                    lineWidth: 1,
+                    params: { period: 30 }
                 }]
             };
             chart = new Highcharts.StockChart(cfg, function(chart) {
