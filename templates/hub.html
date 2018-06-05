@@ -411,7 +411,10 @@ app.controller('myCtrl', function($scope, $timeout) {
             }
             chart.redraw();
         }
-        $scope.ticker.last = window._chart.series[0].data[window._chart.series[0].data.length-1].close;
+
+        if (window._chart.series[0].data.length > 0) {
+            $scope.ticker.last = window._chart.series[0].data[window._chart.series[0].data.length-1].close;
+        }
     }
     
     var channels = [];
