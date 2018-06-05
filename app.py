@@ -1,9 +1,7 @@
 #!encoding=utf8
 
-# 配置BotVS平台的AccessKey与SecretKey
 
-
-import os, time, urllib, md5, json, sqlite3, datetime
+import os, time, logging, urllib, md5, json, sqlite3, datetime
 from flask import jsonify, request, Flask, render_template, redirect, url_for
 from flask_bootstrap import WebCDN, Bootstrap
 from flask_wtf import FlaskForm
@@ -12,6 +10,9 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [line:%(lineno)d] %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+# 配置BotVS平台的AccessKey与SecretKey (修改xxxxx/yyyyy)
 BOTVS_ACCESS_KEY = os.getenv('BOTVS_ACCESS_KEY', 'xxxxx')
 BOTVS_SECRET_KEY = os.getenv('BOTVS_SECRET_KEY', 'yyyyy')
 
@@ -54,8 +55,9 @@ def get_exchange_list():
         exchanges_list = [
             {u'website': u'https://www.binance.com/', u'name': u'\u5e01\u5b89', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'Binance', u'logo': u'binance.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 0},
             {u'website': u'https://www.okex.com/', u'name': u'OKEX', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'OKEX', u'logo': u'okex.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 1},
+            {u'website': u'https://www.huobipro.com/', u'name': u'Huobi Pro', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'OKEX', u'logo': u'okex.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 1},
         ]
-        print ' * Initialize %d exchanges' % (len(exchanges_list), )
+        logging.debug(' * Initialize %d exchanges' % (len(exchanges_list), ))
     return exchanges_list
 
 def get_default_stock(eid):
