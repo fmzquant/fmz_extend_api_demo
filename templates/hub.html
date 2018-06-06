@@ -29,6 +29,7 @@
                 <!--<label class="label label-danger" style="margin-right:5px">{{currentMarket.label}}.{{currentSymbol}}</label>-->
                 <div class="btn-group" role="group">
                     <button ng-repeat="ele in periodGroup" ng-click="switchPeriod(ele.v)" ng-class="{true:'btn btn-success btn-xs', false:'btn btn-default btn-xs'}[currentperiod==ele.v]">{{ ele.name}}</button>
+                    <button class="btn btn-warning btn-xs" ng-disabled="isLoading" ng-click="refreshMarket()"><i class="glyphicon glyphicon-refresh"></i></button>
                 </div>
                 <div class="pull-right">
                     <span style="margin-right:30px"><b>Update</b>: {{update}}</span>
@@ -194,7 +195,7 @@
         </div>
     </div>
 </div>
- 
+
 <script>
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $timeout) {
@@ -218,6 +219,9 @@ app.controller('myCtrl', function($scope, $timeout) {
     $scope.platforms = platforms;
     if (platforms.length == 0) {
         return;
+    }
+    if (typeof(symbols) == 'undefined') {
+        symbols = [];
     }
     for (var i = 0; i < platforms.length; i++) {
         for (var j = 0; j < symbols.length; j++) {
@@ -269,7 +273,7 @@ app.controller('myCtrl', function($scope, $timeout) {
         {name:'1d', v:1440*60},
     ]
     $scope.currentperiod = localStorage.getItem("period") || 15*60;
-    
+
     $scope.trades = [];
     $scope.cutNumber = function(n, precision) {
         n = n.replace(/[^0-9\.]/g, '');
@@ -294,7 +298,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     });
 
 
-    function updateChart(ohlc, volume) {
+    function updateChart(ohlc, volume, force) {
         var chartName = 'sandbox';
         if (chart == null) {
             var groupingUnits = [
@@ -321,7 +325,7 @@ app.controller('myCtrl', function($scope, $timeout) {
                 plotOptions: {
                     series: {
                         turboThreshold: 0,
-                        marker:{  
+                        marker:{
                             enabled:false,
                         },
                     },
@@ -394,29 +398,34 @@ app.controller('myCtrl', function($scope, $timeout) {
                 window._chart = chart;
             });
         } else {
-            var needShift = chart.series[0].data.length > 2000;
-            for (var i = 0; i < ohlc.length; i++) {
-                var point = chart.get(ohlc[i].id);
-                if (point) {
-                    point.update(ohlc[i], false);
-                } else {
-                    chart.series[0].addPoint(ohlc[i], false, needShift);
-                }
-                point = chart.get(volume[i].id);
-                if (point) {
-                    point.update(volume[i], false);
-                } else {
-                    chart.series[1].addPoint(volume[i], false, needShift);
-                }
+            if (typeof(force) !== 'undefiend' && force) {
+              chart.series[0].setData(ohlc);
+              chart.series[1].setData(volume);
+            } else {
+              var needShift = chart.series[0].data.length > 2000;
+              for (var i = 0; i < ohlc.length; i++) {
+                  var point = chart.get(ohlc[i].id);
+                  if (point) {
+                      point.update(ohlc[i], false);
+                  } else {
+                      chart.series[0].addPoint(ohlc[i], false, needShift);
+                  }
+                  point = chart.get(volume[i].id);
+                  if (point) {
+                      point.update(volume[i], false);
+                  } else {
+                      chart.series[1].addPoint(volume[i], false, needShift);
+                  }
+              }
+              chart.redraw();
             }
-            chart.redraw();
         }
 
         if (window._chart.series[0].data.length > 0) {
             $scope.ticker.last = window._chart.series[0].data[window._chart.series[0].data.length-1].close;
         }
     }
-    
+
     var channels = [];
     ['ticker', 'depth', 'ohlc@'+$scope.currentperiod].map(function(c){
         channels.push($scope.symbol.toLowerCase()+"."+c);
@@ -506,7 +515,7 @@ app.controller('myCtrl', function($scope, $timeout) {
         localStorage.setItem("period", period);
         location.reload(true);
     }
-    
+
     $scope.switchMarket = function() {
         goSymbol($scope.currentMarket.pid, $scope.currentSymbol);
     }
@@ -515,6 +524,48 @@ app.controller('myCtrl', function($scope, $timeout) {
             wsObj.close();
         }
     });
+    function updateMarket(obj) {
+        // ticker
+        if (obj[0]) {
+            var ticker = obj[0];
+            $scope.ticker.ask = ticker.Sell;
+            $scope.ticker.bid = ticker.Buy;
+            $scope.ticker.high = ticker.High;
+            $scope.ticker.low = ticker.Low;
+            $scope.ticker.last = ticker.Last;
+            $scope.ticker.vol = ticker.Volume;
+        }
+        // depth
+        if (obj[1]) {
+            var asks = obj[1].Asks;
+            var bids = obj[1].Bids;
+            var rows = [];
+            var maxLen = Math.min(10, Math.max(asks.length, bids.length));
+            if (asks.length > 0) {
+                $scope.ticker.ask = asks[0].Price;
+            }
+            if (bids.length > 0) {
+                $scope.ticker.bid = bids[0].Price;
+            }
+            for (var i = 0; i < maxLen; i++) {
+                rows.push([[asks[i].Price, asks[i].Amount] || [undefined, undefined], [bids[i].Price, bids[i].Amount] || [undefined, undefined]]);
+            }
+            $scope.depth = {rows:rows};
+        }
+        // ohlc
+        if (obj[2]) {
+            var records = obj[2];
+            var ohlc = [];
+            var volume = [];
+            for (var i = 0; i < records.length; i++) {
+                var obj = records[i];
+                var x = obj.Time;
+                ohlc.push({id:'k_' + x, x:x, open:obj.Open, high:obj.High, low:obj.Low, close:obj.Close});
+                volume.push({id: 'v_' + x, x:x, y: obj.Volume});
+            }
+            updateChart(ohlc, volume, true);
+        }
+    }
     function action(action, symbol, args) {
         if (typeof(args) === 'undefined') {
             args = [];
@@ -540,18 +591,21 @@ app.controller('myCtrl', function($scope, $timeout) {
                                 {currency: arr[0], free: acc.Stocks, frozen: acc.FrozenStocks},
                             ];
                         }
+                    } else if (action == "market") {
+                        updateMarket(obj);
+                    } else {
+                        console.log("RET:", action, obj);
                     }
-                } else {
-                    errMsg = angular.toJson(dic.logs);
-                    for (var i = 0; i < dic.logs.length; i++) {
-                        if (dic.logs[i].LogType==3) {
-                            errMsg = dic.logs[i].Extra;
-                            break;
-                        }
+                }
+                var errMsg = "";
+                for (var i = 0; i < dic.logs.length; i++) {
+                    if (dic.logs[i].LogType==3) {
+                        errMsg = dic.logs[i].Extra;
+                        break;
                     }
                 }
             }
-            if (action != "balance") {
+            if (action != "balance" && action != "market") {
                 $scope.updateBalance();
             }
             $scope.$digest();
@@ -595,8 +649,10 @@ app.controller('myCtrl', function($scope, $timeout) {
         action("cancel", $scope.symbol, [order.Id])
     };
     $scope.refresh = function() {
-        //location.reload(true);
         $scope.updateBalance();
+    }
+    $scope.refreshMarket = function() {
+        action("market", $scope.symbol, [parseInt($scope.currentperiod)]);
     }
     $timeout($scope.updateBalance, 0);
 });
