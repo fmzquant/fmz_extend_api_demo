@@ -227,7 +227,7 @@ app.controller('myCtrl', function($scope, $timeout) {
             var obj = $scope.markets[i];
             if (obj.pid == defPid) {
                 found = true;
-                for (var j = 0; j < obj.symbols.length; j++) {
+                for (var j = obj.symbols.length-1; j >= 0; j--) {
                     $scope.currentMarket = obj;
                     $scope.currentSymbol = obj.symbols[j];
                     if (obj.symbols[j].toLowerCase() == defSymbol.toLowerCase()) {
