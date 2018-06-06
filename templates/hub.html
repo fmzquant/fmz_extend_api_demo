@@ -28,7 +28,7 @@
                 <!--<label class="label label-danger" style="margin-right:5px">{{currentMarket.label}}.{{currentSymbol}}</label>-->
                 <div class="btn-group" role="group">
                     <button ng-repeat="ele in periodGroup" ng-click="switchPeriod(ele.v)" ng-class="{true:'btn btn-success btn-xs', false:'btn btn-default btn-xs'}[currentperiod==ele.v]">{{ ele.name}}</button>
-                    <button class="btn btn-warning btn-xs" ng-disabled="isLoading" ng-click="refreshMarket()"><i class="glyphicon glyphicon-refresh"></i></button>
+                    <button class="btn btn-warning btn-xs" ng-disabled="isMarketLoading" ng-click="refreshMarket()"><i class="glyphicon glyphicon-refresh"></i></button>
                 </div>
                 <div class="pull-right">
                     <span style="margin-right:30px"><b>Update</b>: {{update}}</span>
@@ -509,6 +509,7 @@ app.controller('myCtrl', function($scope, $timeout) {
         // ticker
         if (obj[0]) {
             var ticker = obj[0];
+            $scope.ticker.update = new Date().getTime();
             $scope.ticker.ask = ticker.Sell;
             $scope.ticker.bid = ticker.Buy;
             $scope.ticker.high = ticker.High;
@@ -546,14 +547,23 @@ app.controller('myCtrl', function($scope, $timeout) {
             }
             updateChart(ohlc, volume, true);
         }
+        $scope.update = _T(new Date().getTime());
     }
     function action(action, symbol, args) {
         if (typeof(args) === 'undefined') {
             args = [];
         }
-        $scope.isLoading = true;
+        if (action == "market") {
+            $scope.isMarketLoading = true;
+        } else {
+            $scope.isLoading = true;
+        }
         $.ajax({ url: "/hub?action="+action+"&symbol="+symbol+"&args="+angular.toJson(args)+"&pid="+__pid, success: function(res){
-            $scope.isLoading = false;
+            if (action == "market") {
+                $scope.isMarketLoading = false;
+            } else {
+                $scope.isLoading = false;
+            }
             var errMsg = "";
             if (res.code == 0) {
                 var dic = angular.fromJson(res.data.result);
@@ -597,7 +607,11 @@ app.controller('myCtrl', function($scope, $timeout) {
             }
         }}).done(function( data ) {
         }).always(function() {
-            $scope.isLoading = false;
+            if (action == "market") {
+                $scope.isMarketLoading = false;
+            } else {
+                $scope.isLoading = false;
+            }
         });
     }
 
