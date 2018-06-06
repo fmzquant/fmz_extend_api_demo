@@ -226,11 +226,11 @@ app.controller('myCtrl', function($scope, $timeout) {
         for (var i = 0; i < $scope.markets.length && !found; i++) {
             var obj = $scope.markets[i];
             if (obj.pid == defPid) {
+                found = true;
                 for (var j = 0; j < obj.symbols.length; j++) {
+                    $scope.currentMarket = obj;
+                    $scope.currentSymbol = obj.symbols[j];
                     if (obj.symbols[j].toLowerCase() == defSymbol.toLowerCase()) {
-                        found = true;
-                        $scope.currentMarket = obj;
-                        $scope.currentSymbol = obj.symbols[j];
                         break
                     }
                 }
@@ -603,7 +603,7 @@ app.controller('myCtrl', function($scope, $timeout) {
             }
             $scope.$digest();
             if (errMsg.length > 0){
-                alertify.alert("Error: " + errMsg);
+                alertify.log("Error: " + errMsg);
             }
         }}).done(function( data ) {
         }).always(function() {
