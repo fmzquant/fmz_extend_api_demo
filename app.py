@@ -66,8 +66,8 @@ def get_default_stock(eid):
         if e['eid'] == eid:
             return e['stocks'].split(',')[0]
 
-def plugin_run(exchanges, code, pair=None):
-    settings = { "period": 60, "source": code, "exchanges": []}
+def plugin_run(exchanges, code, pair=None, period=900):
+    settings = { "period": period/60, "source": code, "exchanges": []}
     for e in exchanges:
         if pair is None:
             piar = get_default_stock(e.eid)
@@ -252,8 +252,20 @@ def hub():
             action = action.lower().strip()
         if symbol is not None:
             symbol = symbol.split('.')[1]
-        if action == "buy" or action == "sell":
-            args = json.loads(request.args.get('args'))
+        args = json.loads(request.args.get('args', '[]'))
+        if action == "market":
+            # 手动刷新市场行情
+            r = plugin_run([Exchange.query.filter_by(user_id=current_user.id, id=request.args.get('pid', -1)).first()], '''
+        function main() {
+            exchange.SetTimeout(2000);
+            var a = exchange.Go("GetTicker");
+            var b = exchange.Go("GetDepth")
+            var c = exchange.Go("GetRecords");
+            return [a.wait(),b.wait(),c.wait()];
+        }
+            ''', symbol, args[0])
+            return jsonify(r)
+        elif action == "buy" or action == "sell":
             r = plugin_run([Exchange.query.filter_by(user_id=current_user.id, id=request.args.get('pid', -1)).first()], '''
         function main() {
             exchange.SetTimeout(2000);
@@ -263,7 +275,6 @@ def hub():
             ''' % (action, args[0], args[1]), symbol)
             return jsonify(r)
         elif action == "cancel":
-            args = json.loads(request.args.get('args'))
             r = plugin_run([Exchange.query.filter_by(user_id=current_user.id, id=request.args.get('pid', -1)).first()], '''
         function main() {
             exchange.SetTimeout(2000);
@@ -292,4 +303,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
