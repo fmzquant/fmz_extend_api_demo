@@ -47,17 +47,10 @@ def api(method, *args, **kwargs):
 
 
 exchanges_list = None
-def get_exchange_list():
+def get_exchange_list(force=False):
     global exchanges_list
-    if exchanges_list is None:
-        # init exchanges
-        #exchanges_list = api('GetExchangeList', cache=True)['data']['result']['exchanges']
-        exchanges_list = [
-            {u'website': u'https://www.binance.com/', u'name': u'\u5e01\u5b89', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'Binance', u'logo': u'binance.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 0},
-            {u'website': u'https://www.okex.com/', u'name': u'OKEX', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'OKEX', u'logo': u'okex.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 1},
-            {u'website': u'https://www.huobipro.com/', u'name': u'Huobi Pro', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'Huobi', u'logo': u'okex.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 2},
-            {u'website': u'https://www.bitfinex.com/', u'name': u'Bitfinex', u'meta': u'[{"desc": "Access Key", "required": true, "type": "string", "name": "AccessKey", "label": "Access Key"}, {"encrypt": true, "name": "SecretKey", "required": true, "label": "Secret Key", "type": "password", "desc": "Secret Key"}]', u'eid': u'Bitfinex', u'logo': u'okex.png', u'stocks': u'LTC_BTC,ETH_BTC,WTC_BTC', u'id': 3},
-        ]
+    if exchanges_list is None or force:
+        exchanges_list = json.loads(urllib.urlopen('http://q.botvs.net/api/symbols').read())
         logging.debug(' * Initialize %d exchanges' % (len(exchanges_list), ))
     return exchanges_list
 
@@ -146,6 +139,10 @@ class RegisterForm(FlaskForm):
 @app.route('/')
 def index():
     return render_template('index.html', current_user=current_user)
+
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    return jsonify(get_exchange_list(True))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -293,9 +290,14 @@ def hub():
             return jsonify(r)
     platforms = Exchange.query.filter_by(user_id=current_user.id).all()
     arr = []
+    es = get_exchange_list()
     for ele in platforms:
-        arr.append({'id': ele.id, 'eid': ele.eid, 'label': ele.label})
+        for obj in es:
+            if obj['eid'] == ele.eid:
+                arr.append({'id': ele.id, 'pid': ele.id, 'name': obj['name'], 'symbols': obj['symbols'], 'eid': ele.eid, 'label': ele.label})
+                break
     return render_template('dashboard.html', current_user=current_user, platforms=json.dumps(arr))
+
 @app.route('/logout')
 @login_required
 def logout():
