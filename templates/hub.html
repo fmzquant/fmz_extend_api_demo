@@ -1,5 +1,4 @@
 
-<script src="http://q.botvs.net/api/symbols?format=script&var=symbols"></script>
 <script>
     var platforms = {{ platforms | safe}};
 </script>
@@ -10,7 +9,7 @@
             <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
         </div>
     </div>
-    <div class="row" ng-show="platforms.length>0">
+    <div class="row" ng-show="markets.length>0">
         <div class="alert alert-success" align="center">
             <div ng-show="ticker.update==0">
                 Loading...
@@ -211,32 +210,14 @@ app.controller('myCtrl', function($scope, $timeout) {
     function _T(n) {
         return moment(n).format('YYYY-MM-DD HH:mm:ss');
     }
+    if (platforms.length == 0) {
+        return;
+    }
     var maxTrades = 30;
     $scope.ticker = {update:0};
     $scope.depth = {rows: [], asks:[], bids:[]};
     $scope.op = {};
-    $scope.markets = [];
-    $scope.platforms = platforms;
-    if (platforms.length == 0) {
-        return;
-    }
-    if (typeof(symbols) == 'undefined') {
-        symbols = [];
-    }
-    for (var i = 0; i < platforms.length; i++) {
-        for (var j = 0; j < symbols.length; j++) {
-            if (symbols[j].eid == platforms[i].eid) {
-                $scope.markets.push({
-                    'pid': platforms[i].id,
-                    'label': platforms[i].label,
-                    'eid': symbols[i].eid,
-                    'name': symbols[j].name,
-                    'symbols': symbols[j].symbols,
-                });
-                break;
-            }
-        }
-    }
+    $scope.markets = platforms;
     var defPid = parseInt(localStorage.getItem("pid"));
     var defSymbol = localStorage.getItem("symbol");
     var found = false;
@@ -598,10 +579,12 @@ app.controller('myCtrl', function($scope, $timeout) {
                     }
                 }
                 var errMsg = "";
-                for (var i = 0; i < dic.logs.length; i++) {
-                    if (dic.logs[i].LogType==3) {
-                        errMsg = dic.logs[i].Extra;
-                        break;
+                if (typeof(dic.logs) !== 'undefined') {
+                    for (var i = 0; i < dic.logs.length; i++) {
+                        if (dic.logs[i].LogType==3) {
+                            errMsg = dic.logs[i].Extra;
+                            break;
+                        }
                     }
                 }
             }
