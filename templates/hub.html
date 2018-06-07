@@ -202,6 +202,14 @@ app.controller('myCtrl', function($scope, $timeout) {
     var ORDER_TYPE_MARKET = 1;
     var ORDER_BUY = 0;
     var ORDER_SELL = 1;
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
     function _N(n, precision) {
         return parseInt(Math.round(n * Math.pow(10, precision))) / Math.pow(10, precision)
@@ -603,7 +611,10 @@ app.controller('myCtrl', function($scope, $timeout) {
             }
             $scope.$digest();
             if (errMsg.length > 0){
-                alertify.log("Error: " + errMsg);
+                if (errMsg.length > 1024) {
+                    errMsg = errMsg.substring(0, 1024) + " ...";
+                }
+                alertify.log("Error: " + escapeHtml(errMsg));
             }
         }}).done(function( data ) {
         }).always(function() {
