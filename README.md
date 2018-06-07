@@ -161,5 +161,6 @@ BotVS 对于 技术底层做出了强有力的支持，只需使用 BotVS 的 �
     
       DEMO附带了一个简单的交易中心, 以帮助用户了解BotVS平台扩展API
       
-      ![alt](https://dn-filebox.qbox.me/e9863cf66473b5a9ea974d0f4546cb7afe203414.png) 
+      ![alt](https://dn-filebox.qbox.me/05da54385c1518514b1de45c0a484a5015a895c3.png) 
+      
 
