@@ -131,7 +131,7 @@
             </div>
             <div class="col-md-4">
                 <div class="panel panel-default">
-                    <div class="panel-heading">Last: <font color="red"><b>{{ticker.last || '--'}}</b></font></div>
+                    <div class="panel-heading">Last: <font color="red"><b>{{ticker.last || '--'}}</b></font><span class="pull-right"><input type="checkbox" ng-model="autoSync">&nbsp;Sync</span></div>
                     <table class="table table-condensed table-hover">
                         <thead>
                             <tr>
@@ -222,6 +222,7 @@ app.controller('myCtrl', function($scope, $timeout) {
         return;
     }
     var maxTrades = 30;
+    $scope.autoSync = true;
     $scope.ticker = {update:0};
     $scope.depth = {rows: [], asks:[], bids:[]};
     $scope.op = {};
@@ -287,7 +288,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     });
 
 
-    function updateChart(ohlc, volume, force) {
+    function updateChart(ohlc, volume) {
         var chartElement = "ohlc_chart";
         if (chart == null) {
             var groupingUnits = [
@@ -333,10 +334,6 @@ app.controller('myCtrl', function($scope, $timeout) {
                     crosshairs: true,
                     shared: true,
                     snap: 1,
-                },
-                xAxis: {
-                    min: ohlc.length > 0 ? ohlc[ohlc.length-Math.min(ohlc.length, 50)].x : 0,
-                    max: ohlc.length > 0 ? ohlc[ohlc.length-1].x : 0
                 },
                 yAxis: [{
                     height: '95%',
@@ -384,6 +381,9 @@ app.controller('myCtrl', function($scope, $timeout) {
                 }]
             };
             chart = new Highcharts.StockChart(cfg, function(chart) {
+                if (ohlc.length > 0) {
+                    chart.xAxis[0].setExtremes(ohlc[ohlc.length-Math.min(ohlc.length, 50)].x, ohlc[ohlc.length-1].x);
+                }
                 window._chart = chart;
             });
         } else {
@@ -433,18 +433,22 @@ app.controller('myCtrl', function($scope, $timeout) {
                         var arr = ele.e.split('.');
                         var e = arr[2];
                         if (e == 'ticker') {
-                            $scope.ticker = _.extend({'update': ele.t}, ele.d);
-                            $scope.update = _T(ele.t) + "." + ele.t%1000;
-                        } else if (e.indexOf('ohlc') !== -1) {
-                            var ohlc = [];
-                            var volume = [];
-                            for (var i = 0; i < ele.d.length; i++) {
-                                var obj = ele.d[i];
-                                var x = obj.t;
-                                ohlc.push({id:'k_' + x, x:x, open:obj.o, high:obj.h, low:obj.l, close:obj.c});
-                                volume.push({id: 'v_' + x, x:x, y: obj.v});
+                            if ($scope.autoSync) {
+                                $scope.ticker = _.extend({'update': ele.t}, ele.d);
+                                $scope.update = _T(ele.t) + "." + ele.t%1000;
                             }
-                            updateChart(ohlc, volume);
+                        } else if (e.indexOf('ohlc') !== -1) {
+                            if ($scope.autoSync) {
+                                var ohlc = [];
+                                var volume = [];
+                                for (var i = 0; i < ele.d.length; i++) {
+                                    var obj = ele.d[i];
+                                    var x = obj.t;
+                                    ohlc.push({id:'k_' + x, x:x, open:obj.o, high:obj.h, low:obj.l, close:obj.c});
+                                    volume.push({id: 'v_' + x, x:x, y: obj.v});
+                                }
+                                updateChart(ohlc, volume);
+                            }
                         } else if (e == 'trade') {
                             /*
                             var arr = $scope.trades.concat(ele.d);
@@ -454,20 +458,22 @@ app.controller('myCtrl', function($scope, $timeout) {
                             $scope.trades = arr;
                             */
                         } else if (e == 'depth') {
-                            var asks = ele.d.asks;
-                            var bids = ele.d.bids;
-                            var rows = [];
-                            var maxLen = Math.min(10, Math.max(asks.length, bids.length));
-                            if (asks.length > 0) {
-                                $scope.ticker.ask = asks[0][0];
+                            if ($scope.autoSync) {
+                                var asks = ele.d.asks;
+                                var bids = ele.d.bids;
+                                var rows = [];
+                                var maxLen = Math.min(10, Math.max(asks.length, bids.length));
+                                if (asks.length > 0) {
+                                    $scope.ticker.ask = asks[0][0];
+                                }
+                                if (bids.length > 0) {
+                                    $scope.ticker.bid = bids[0][0];
+                                }
+                                for (var i = 0; i < maxLen; i++) {
+                                    rows.push([asks[i] || [undefined, undefined], bids[i] || [undefined, undefined]]);
+                                }
+                                $scope.depth = {rows:rows};
                             }
-                            if (bids.length > 0) {
-                                $scope.ticker.bid = bids[0][0];
-                            }
-                            for (var i = 0; i < maxLen; i++) {
-                                rows.push([asks[i] || [undefined, undefined], bids[i] || [undefined, undefined]]);
-                            }
-                            $scope.depth = {rows:rows};
                         }
                     }
                 })
@@ -548,7 +554,11 @@ app.controller('myCtrl', function($scope, $timeout) {
                 ohlc.push({id:'k_' + x, x:x, open:obj.Open, high:obj.High, low:obj.Low, close:obj.Close});
                 volume.push({id: 'v_' + x, x:x, y: obj.Volume});
             }
-            updateChart(ohlc, volume, true);
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+            updateChart(ohlc, volume);
         }
         $scope.update = _T(new Date().getTime());
     }
