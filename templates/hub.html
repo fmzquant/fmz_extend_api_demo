@@ -288,7 +288,7 @@ app.controller('myCtrl', function($scope, $timeout) {
 
 
     function updateChart(ohlc, volume, force) {
-        var chartName = 'sandbox';
+        var chartElement = "ohlc_chart";
         if (chart == null) {
             var groupingUnits = [
                 [ 'minute', [60] ],
@@ -309,7 +309,7 @@ app.controller('myCtrl', function($scope, $timeout) {
                     enabled: false
                 },
                 chart: {
-                    renderTo: "ohlc_chart"
+                    renderTo: chartElement, 
                 },
                 plotOptions: {
                     series: {
@@ -387,27 +387,22 @@ app.controller('myCtrl', function($scope, $timeout) {
                 window._chart = chart;
             });
         } else {
-            if (typeof(force) !== 'undefiend' && force) {
-              chart.series[0].setData(ohlc);
-              chart.series[1].setData(volume);
-            } else {
-              var needShift = chart.series[0].data.length > 2000;
-              for (var i = 0; i < ohlc.length; i++) {
-                  var point = chart.get(ohlc[i].id);
-                  if (point) {
-                      point.update(ohlc[i], false);
-                  } else {
-                      chart.series[0].addPoint(ohlc[i], false, needShift);
-                  }
-                  point = chart.get(volume[i].id);
-                  if (point) {
-                      point.update(volume[i], false);
-                  } else {
-                      chart.series[1].addPoint(volume[i], false, needShift);
-                  }
-              }
-              chart.redraw();
+            var needShift = chart.series[0].data.length > 2000;
+            for (var i = 0; i < ohlc.length; i++) {
+                var point = chart.get(ohlc[i].id);
+                if (point) {
+                    point.update(ohlc[i], false);
+                } else {
+                    chart.series[0].addPoint(ohlc[i], false, needShift);
+                }
+                point = chart.get(volume[i].id);
+                if (point) {
+                    point.update(volume[i], false);
+                } else {
+                    chart.series[1].addPoint(volume[i], false, needShift);
+                }
             }
+            chart.redraw();
         }
 
         if (window._chart.series[0].data.length > 0) {
