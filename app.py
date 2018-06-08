@@ -95,6 +95,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supposedtobeveryimportantsecret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'user.sqlite3')
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 bootstrap = Bootstrap(app)
 
 
