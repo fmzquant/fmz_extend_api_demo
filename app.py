@@ -43,7 +43,7 @@ def api(method, *args, **kwargs):
         'nonce': int(time.time() * 1000),
         }
     d['sign'] = md5.md5('%s|%s|%s|%d|%s' % (d['version'], d['method'], d['args'], d['nonce'], BOTVS_SECRET_KEY)).hexdigest()
-    return json.loads(urllib.urlopen('https://www.botvs.com/api/v1', urllib.urlencode(d)).read())
+    return json.loads(urllib.urlopen('https://www.fmz.com/api/v1', urllib.urlencode(d)).read())
 
 
 exchanges_list = None
