@@ -63,7 +63,7 @@ def plugin_run(exchanges, code, pair=None, period=900):
     settings = { "period": period/60, "source": code, "exchanges": []}
     for e in exchanges:
         if pair is None:
-            piar = get_default_stock(e.eid)
+            pair = get_default_stock(e.eid)
         settings["exchanges"].append({"eid": e.eid, "pair": pair, "meta" :{"AccessKey": e.accessKey, "SecretKey": e.secretKey}})
     return api('PluginRun', settings)
 
