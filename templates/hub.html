@@ -35,7 +35,7 @@
                     <select style="height:25px" ng-model="currentMarket" ng-change="switchMarket()" ng-options="market.label for market in markets"></select>
                     <select style="height:25px" ng-model="currentSymbol" ng-change="switchMarket()" ng-options="symbol for symbol in currentMarket.symbols"></select>
                 </div>
-                <div style="height:380px" id="ohlc_chart"></div>
+                <div style="height:380px;width:100%" id="ohlc_chart"></div>
                 <div style="margin-top:5px">
                     <ul class="nav nav-tabs">
                         <li role="presentation" class="inactive">
@@ -414,7 +414,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     ['ticker', 'depth', 'ohlc@'+$scope.currentperiod].map(function(c){
         channels.push($scope.symbol.toLowerCase()+"."+c);
     });
-    var addr = "ws://q.botvs.net/api/stream?streams="+channels.join("/");
+    var addr = "wss://io.fmz.com/api/stream?streams="+channels.join("/");
     var wsStatus = 0;
     var wsObj = null;
     $scope.retryTime = 0;
