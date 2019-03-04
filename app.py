@@ -50,7 +50,7 @@ exchanges_list = None
 def get_exchange_list(force=False):
     global exchanges_list
     if exchanges_list is None or force:
-        exchanges_list = json.loads(urllib.urlopen('https://io.fmz.com/api/symbols').read())
+        exchanges_list = json.loads(urllib.urlopen('https://www.fmz.com/market/symbols.json').read())
         logging.debug(' * Initialize %d exchanges' % (len(exchanges_list), ))
     return exchanges_list
 
