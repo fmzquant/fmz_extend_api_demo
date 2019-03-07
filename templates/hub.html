@@ -4,10 +4,8 @@
 </script>
 {% raw %}
 <div ng-app="myApp" ng-controller="myCtrl" ng-cloak>
-    <div class="row" style="margin-top:30px" ng-show="platforms.length==0">
-        <div class="alert alert-danger" role="alert" style="margin-top:20px">
-            <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
-        </div>
+    <div class="alert alert-danger" role="alert" ng-show="markets.length==0" style="margin-top:20px">
+        <a href="/exchanges">你好没有绑定任何资产, 点击进行资产绑定 !</a>
     </div>
     <div class="row" ng-show="markets.length>0">
         <div class="alert alert-success" align="center">
@@ -218,15 +216,15 @@ app.controller('myCtrl', function($scope, $timeout) {
     function _T(n) {
         return moment(n).format('YYYY-MM-DD HH:mm:ss');
     }
-    if (platforms.length == 0) {
-        return;
-    }
     var maxTrades = 30;
     $scope.autoSync = true;
     $scope.ticker = {update:0};
     $scope.depth = {rows: [], asks:[], bids:[]};
     $scope.op = {};
     $scope.markets = platforms;
+    if (platforms.length == 0) {
+        return;
+    }
     var defPid = parseInt(localStorage.getItem("pid"));
     var defSymbol = localStorage.getItem("symbol");
     var found = false;
