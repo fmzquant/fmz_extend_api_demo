@@ -1,7 +1,15 @@
 #!encoding=utf8
 
 
-import os, time, logging, urllib, md5, json, sqlite3, datetime
+import os, time, logging, json, sqlite3, datetime
+try:
+    import md5
+    import urllib2
+    from urllib import urlencode
+except:
+    import hashlib as md5
+    import urllib.request as urllib2
+    from urllib.parse import urlencode
 from flask import jsonify, request, Flask, render_template, redirect, url_for
 from flask_bootstrap import WebCDN, Bootstrap
 from flask_wtf import FlaskForm
@@ -15,6 +23,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [line:%(lineno)d] %
 # 配置BotVS平台的AccessKey与SecretKey (修改xxxxx/yyyyy)
 BOTVS_ACCESS_KEY = os.getenv('BOTVS_ACCESS_KEY', 'xxxxx')
 BOTVS_SECRET_KEY = os.getenv('BOTVS_SECRET_KEY', 'yyyyy')
+
 
 
 class cached(object):
@@ -34,7 +43,7 @@ class cached(object):
         return inner
 
 @cached(timeout=600)
-def api(method, *args, **kwargs):
+def api(method, *args):
     d = {
         'version': '1.0',
         'access_key': BOTVS_ACCESS_KEY,
@@ -42,15 +51,15 @@ def api(method, *args, **kwargs):
         'args': json.dumps(list(args)),
         'nonce': int(time.time() * 1000),
         }
-    d['sign'] = md5.md5('%s|%s|%s|%d|%s' % (d['version'], d['method'], d['args'], d['nonce'], BOTVS_SECRET_KEY)).hexdigest()
-    return json.loads(urllib.urlopen('https://www.fmz.com/api/v1', urllib.urlencode(d)).read())
+    d['sign'] = md5.md5(('%s|%s|%s|%d|%s' % (d['version'], d['method'], d['args'], d['nonce'], BOTVS_SECRET_KEY)).encode('utf-8')).hexdigest()
+    return json.loads(urllib2.urlopen('https://www.fmz.com/api/v1', urlencode(d).encode('utf-8')).read().decode('utf-8'))
 
 
 exchanges_list = None
 def get_exchange_list(force=False):
     global exchanges_list
     if exchanges_list is None or force:
-        exchanges_list = json.loads(urllib.urlopen('https://www.fmz.com/market/symbols.json').read())
+        exchanges_list = json.loads(urllib2.urlopen('https://www.fmz.com/market/symbols.json').read())
         logging.debug(' * Initialize %d exchanges' % (len(exchanges_list), ))
     return exchanges_list
 
