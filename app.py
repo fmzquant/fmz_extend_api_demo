@@ -164,7 +164,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
-            if user.password == md5.md5(user.email+'__slat__'+form.password.data).hexdigest():
+            if user.password == md5.md5((user.email+'__slat__'+form.password.data).encode("utf8")).hexdigest():
                 login_user(user)
                 return redirect(url_for('dashboard'))
         error = u'用户名或密码错误'
