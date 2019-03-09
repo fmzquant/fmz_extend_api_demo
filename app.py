@@ -174,7 +174,7 @@ def login():
 def signup():
     form = RegisterForm()
     if form.validate_on_submit():
-        hashed_password = md5.md5(form.email.data+'__slat__'+form.password.data).hexdigest()
+        hashed_password = md5.md5((form.email.data+'__slat__'+form.password.data).encode("utf8")).hexdigest()
         ele = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(ele)
         db.session.commit()
