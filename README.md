@@ -47,17 +47,17 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
       git clone https://github.com/fmzquant/fmz_extend_api_demo.git 
       ```
     
-      ![alt](https://dn-filebox.qbox.me/c36383238f93ca220887b7d85e1a611ba3a99007.png)
+      ![alt](https://www.fmz.com/upload/asset/c36383238f93ca220887b7d85e1a611ba3a99007.png)
     
     - 切换到这个 目录，执行 pip 安装
 
-      ![alt](https://dn-filebox.qbox.me/6074daa004ede3ce30eae01c0c7208a5db9708f5.png)
+      ![alt](https://www.fmz.com/upload/asset/6074daa004ede3ce30eae01c0c7208a5db9708f5.png)
     
       ```
       pip install -r requirements.txt 
       ```
       
-      ![alt](https://dn-filebox.qbox.me/c4bdf77264d876f73dd628811865f484bb0992b7.png)
+      ![alt](https://www.fmz.com/upload/asset/c4bdf77264d876f73dd628811865f484bb0992b7.png)
       
       注意：如果提示 Permission denied ， 需要 sudo pip install -r requirements.txt 这样执行 pip ，根据要求输入操作系统密码。
     
@@ -67,11 +67,11 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
       
       创建 FMZ API KEY
       
-      ![alt](https://dn-filebox.qbox.me/28b430e0104147594a264d838838735db4114d9b.png)
+      ![alt](https://www.fmz.com/upload/asset/28b430e0104147594a264d838838735db4114d9b.png)
     
       把 API KEY 写入 ，本DEMO 的 app.py 服务端程序。
       
-      ![alt](https://dn-filebox.qbox.me/426bb928998875dd0e7fbf5f43fed546a3ac2f2f.png )
+      ![alt](https://www.fmz.com/upload/asset/426bb928998875dd0e7fbf5f43fed546a3ac2f2f.png )
 
   - 本DEMO项目 服务端运行命令
 
@@ -80,21 +80,21 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
     ```
     
     - 运行显示：
-      ![alt](https://dn-filebox.qbox.me/60bb0b2e41e31d7354a461a63300841c24658a7f.png)
+      ![alt](https://www.fmz.com/upload/asset/60bb0b2e41e31d7354a461a63300841c24658a7f.png)
       运行服务端程序后，在浏览器打开本地页面：http://127.0.0.1:5000
-      ![alt](https://dn-filebox.qbox.me/6e179f4b1dd680dbcc4f8b96d189f289d780e853.png)
+      ![alt](https://www.fmz.com/upload/asset/6e179f4b1dd680dbcc4f8b96d189f289d780e853.png)
       
     - 测试注册页面
     
-      ![alt](https://dn-filebox.qbox.me/83b09142e42ae0ff4d9c8f789a771fb99c1f2d48.png)
+      ![alt](https://www.fmz.com/upload/asset/83b09142e42ae0ff4d9c8f789a771fb99c1f2d48.png)
       本项目 DEMO 量化平台 已经运行起来了，注册好 这个测试平台的 账号（储存在本地数据的），登录进去 配置 作为这个平台用户的 交易所API KEY。
       
-      ![alt](https://dn-filebox.qbox.me/d38f7155af07c0231dcdf632887585042268d058.png)
-      ![alt](https://dn-filebox.qbox.me/2c6f6c8021a8d69e357a2e0fe538f3a919f3f8b4.png)
+      ![alt](https://www.fmz.com/upload/asset/d38f7155af07c0231dcdf632887585042268d058.png)
+      ![alt](https://www.fmz.com/upload/asset/2c6f6c8021a8d69e357a2e0fe538f3a919f3f8b4.png)
      
       现在配置好了如图：
     
-      ![alt](https://dn-filebox.qbox.me/d7206a4113e2974683a614f455be8dc4fbce9f43.png)
+      ![alt](https://www.fmz.com/upload/asset/d7206a4113e2974683a614f455be8dc4fbce9f43.png)
 
       页面显示的三个策略 仅仅是 UI显示，这些还需要 资产管理量化平台 的管理者 具体设计实现，这里只做演示用。
     
@@ -114,7 +114,7 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
       }
       ```
       
-      ![alt](https://dn-filebox.qbox.me/52792c59a5db460c0bdf5a229803b92f92b8cb07.png)
+      ![alt](https://www.fmz.com/upload/asset/52792c59a5db460c0bdf5a229803b92f92b8cb07.png)
       
       编辑代码后，点击保存。
       注意：在运行前必须确保有一个托管者在线，认识托管者：https://www.fmz.com/bbs-topic/463 。
@@ -122,14 +122,14 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
     - 点击 “一键启动” 按钮， 会自动创建一个 机器人 运行，这个机器人 只会 随机输出数值作为收益数值显示出来。
     
       可以看到 在FMZ的控制中心上显示 出一个 新创建的机器人：
-      ![alt](https://dn-filebox.qbox.me/61ff0f2319aaeb4138e43de626b2a0cf6b357435.png)
+      ![alt](https://www.fmz.com/upload/asset/61ff0f2319aaeb4138e43de626b2a0cf6b357435.png)
     
       DEMO 网页上也显示出对应的 随机数值
-      ![alt](https://dn-filebox.qbox.me/73bb8cde3237d39e927edcaf3cf7a6187d174c1d.png)
+      ![alt](https://www.fmz.com/upload/asset/73bb8cde3237d39e927edcaf3cf7a6187d174c1d.png)
     
     - 在FMZ 上运行的机器人 由 appId 识别 当前DEMO平台 登录的 用户
       
-      ![alt](https://dn-filebox.qbox.me/0d9a9751442b9dc78ba2a0c3b3bc2347c5cd8ab9.png)
+      ![alt](https://www.fmz.com/upload/asset/0d9a9751442b9dc78ba2a0c3b3bc2347c5cd8ab9.png)
       
       ```python
       def robot_run(robotId, appId, exchanges):
@@ -161,7 +161,5 @@ FMZ 对于 技术底层做出了强有力的支持，只需使用 FMZ 的 扩展
     
       DEMO附带了一个简单的交易中心, 以帮助用户了解FMZ平台扩展API
       
-      ![alt](https://dn-filebox.qbox.me/05da54385c1518514b1de45c0a484a5015a895c3.png) 
+      ![alt](https://www.fmz.com/upload/asset/05da54385c1518514b1de45c0a484a5015a895c3.png) 
       
-
-
