@@ -412,7 +412,7 @@ app.controller('myCtrl', function($scope, $timeout) {
     ['ticker', 'depth', 'ohlc@'+$scope.currentperiod].map(function(c){
         channels.push($scope.symbol.toLowerCase()+"."+c);
     });
-    var addr = "wss://www.fmz.com/market/wsapi/stream?streams="+channels.join("/");
+    var addr = "wss://www.fmz.com/chart/wsapi/stream?streams="+channels.join("/");
     var wsStatus = 0;
     var wsObj = null;
     $scope.retryTime = 0;
